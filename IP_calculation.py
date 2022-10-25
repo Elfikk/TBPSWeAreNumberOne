@@ -106,4 +106,4 @@ def IP(fn):
     new_df['IP'] = IP
     return new_df
 
-print(IP(fn).max())
+print(IP(fn))
