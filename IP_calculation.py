@@ -104,6 +104,8 @@ def IP(fn):
         ].copy()
     
     new_df['IP'] = IP
+    new_df['IP_norm'] = new_df['IP']/df1['B0_FD_OWNPV']
+
     return new_df
 
-print(IP(fn))
+IP_norm = IP(fn)
