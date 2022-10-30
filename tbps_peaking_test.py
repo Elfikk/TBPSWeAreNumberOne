@@ -3,8 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-total_dataset_df = pd.read_csv('total_dataset.csv') #load dataset
-#print(total_dataset_df.columns)
+datafilepath = '/Users/gordonlai/Documents/ICL/ICL_Y3/TBPSWeAreNumberOne/Data/' #set your own file path
+total_dataset_df = pd.read_csv(datafilepath + 'total_dataset.csv') #load dataset
+print(total_dataset_df.columns)
 
 # assign columns to value
 b0mass=total_dataset_df['B0_M']
@@ -29,4 +30,4 @@ plt.ylabel('Frequency')
 plt.plot(midpoints,bin_height,'-',color='royalblue',label='Total Signal')
 plt.plot(midpoints_1,bin_height_1,'-',color='salmon', label = 'Peaking Signal')
 plt.legend(loc='best')
-plt.show()
+#plt.show()
