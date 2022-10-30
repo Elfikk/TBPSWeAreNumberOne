@@ -1,3 +1,4 @@
 **/data
 **/Data
 **/__pycache__
+**/*.joblib
