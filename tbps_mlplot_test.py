@@ -36,22 +36,44 @@ signal_df['identity'] = 'signal'
 
 
 # plot result
-total_df2 = pd.read_csv(filepath + '/total_ml_2.csv')
+total_df2 = pd.read_csv(filepath + '/total_ml_4.csv')
 
+# filter using q^2 conditions
+b0mass=total_df2['B0_M']
+invarmass=total_df2['q2']
+total_dataset_df_yes_peaking = total_df2[(invarmass > 0.98) & (invarmass < 1.10) | (invarmass > 8.0) & (invarmass < 11.0) | (invarmass > 12.5) & (invarmass < 15.0)]
+total_df2 = total_df2.merge(total_dataset_df_yes_peaking, how='left', indicator=True)
+total_df2 = total_df2[total_df2['_merge'] == 'left_only'] # line 16-17 from stackoverflow.com
+
+# splitting the dataset into different categories
 total_df_sig = total_df2[(total_df2['identity'] == 'signal')]
 total_df_back = total_df2[(total_df2['identity'] != 'signal')]
-total_df_comb = total_df2[(total_df2['identity'] == 'comb.csv')]
-total_df_peaking = total_df2[(total_df2['identity'] != 'signal') & (total_df2['identity'] != 'comb.csv')]
+total_df_comb = total_df2[(total_df2['identity'] == 'combinatorial')]
+total_df_peaking = total_df2[(total_df2['identity'] != 'signal') & (total_df2['identity'] != 'combinatorial')]
 
+# function to plot midpoints
+def histmidpoints(data,colour,name,binn=100):
+    bin_height, bin_edges, patches = plt.hist(data, bins=binn,alpha=0)
+    midpoints = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+    return plt.plot(midpoints,bin_height,'-',color=colour,label=name)
+    
+# da plots
+numbin=100
 plt.figure()
 plt.xlabel('B0_M')
 plt.ylabel('Count')
-plt.hist(total_df['B0_M'],color='royalblue',label='Total', histtype='step',bins=100) # total data
-plt.hist(signal_df['B0_M'],color='violet',label='Simulated Signal',histtype='step',bins=100) # simulated signal from signal.csv
-plt.hist(total_df_sig['B0_M'],color='red',label='ML Predicted Signal', histtype='step',bins=100) # ML Predicted Signal on total
-plt.hist(total_df_comb['B0_M'],color='cyan',label='ML Predicted Combinatorial', histtype='step',bins=100) # ML Predicted combinatorial background on total
-plt.hist(total_df_peaking['B0_M'],color='green',label='ML Predicted Peaking',histtype='step',bins=100) # ML Predicted peaking background on total
-# plt.hist(total_df_back['B0_M'],color='green',label='Background', histtype='step',bins=100)
-# sns.histplot(data=total_df2['B0_M'])
+# histograms
+plt.hist(total_df2['B0_M'],color='royalblue',label='Total', histtype='step',bins=numbin) # total data
+# plt.hist(signal_df['B0_M'],color='violet',label='Simulated Signal',histtype='step',bins=numbin) # simulated signal from signal.csv
+plt.hist(total_df_sig['B0_M'],color='red',label='ML Predicted Signal', histtype='step',bins=numbin) # ML Predicted Signal on total
+plt.hist(total_df_comb['B0_M'],color='cyan',label='ML Predicted Combinatorial', histtype='step',bins=numbin) # ML Predicted combinatorial background on total
+plt.hist(total_df_peaking['B0_M'],color='green',label='ML Predicted Peaking',histtype='step',bins=numbin) # ML Predicted peaking background on total
+# plt.hist(total_df_back['B0_M'],color='green',label='Background', histtype='step',bins=numbin)
+'''# midpoints
+histmidpoints(total_df2['B0_M'],'royalblue','Total')
+histmidpoints(total_df_sig['B0_M'],'red','ML Predicted Signal')
+histmidpoints(total_df_comb['B0_M'],'cyan','ML Predicted Combinatorial')
+histmidpoints(total_df_peaking['B0_M'],'green','ML Predicted Peaking')
+'''
 plt.legend()
 plt.show()
