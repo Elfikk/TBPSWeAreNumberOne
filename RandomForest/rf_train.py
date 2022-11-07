@@ -4,9 +4,12 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, f1_score
 from preprocessing import training_data, apply_q2_ranges
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 import joblib
 import os
+
+#Initial training, 
 
 #Files in the current directory. Want to check if model has been trained
 #(retraining when I have the wanted the model is in fact, not that useful) 
@@ -47,7 +50,17 @@ cm = confusion_matrix(y_test, predictions, labels = forest.classes_)
 
 disp = ConfusionMatrixDisplay(cm, display_labels = forest.classes_)
 
-disp.plot()
+# disp.plot()
 
+test_sig = X_test.loc[y_test == 1]
+test_masses = test_sig["B0_M"]
+predicted_sig = X_test.loc[predictions == 1]
+predicted_masses = predicted_sig["B0_M"]
+bins = list(np.linspace(5170, 5700, 100))
+
+plt.hist(test_masses, bins = bins, histtype = "step", label = "Signal")
+plt.hist(predicted_masses, bins= bins, histtype = "step", label = "Predicted")
+plt.legend()
+plt.grid()
 plt.show()
 
