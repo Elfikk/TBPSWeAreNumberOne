@@ -8,8 +8,8 @@ df_accept = pd.read_csv("Data/acceptance_mc.csv")
 df_data = pd.read_csv("Data/signal.csv")
 
 #set your bins range
-q2_min = 15.0
-q2_max = 17.9
+q2_min = 0.1
+q2_max = 0.98
 
 #filter for specific bin range
 df_accept = df_accept[df_accept['q2']<q2_max]
@@ -50,10 +50,10 @@ def phi_dist(phi,Fl,At,Ai):
     return dist
 
 #plot the acceptance.csv for a specific angle of interest, within a q2 bin of interest
-y, bin_edges = plt.hist(costhetak_accept,bins=6,density = True)
+y, bin_edges, patches= plt.hist(costhetak_accept,bins=10,density = True, histtype='step')
 
 #if we just want the values and we don't want to plot hist:
-y, bin_edges = np.histogram(costhetak_accept,bins=6,density = True, histtype='step')
+y, bin_edges = np.histogram(costhetak_accept,bins=10,density = True)
 x = 0.5 * (bin_edges[1:] + bin_edges[:-1]) #get a list of the midpoints of the bins
 
 #double check that the x are in the midpoints
@@ -77,8 +77,8 @@ plt.show()
 #double check if the acceptance function works
 #divides the bin heights from acceptance.csv with the polynomial
 #we expect a flat line because ftrue is flat
-y_flat = np.array(y)/np.array(f(x))
-plt.plot(x,y_flat)
+y_flat = y/f(x)
+plt.plot(x,y_flat,'.')
 plt.xlabel('$cos\\theta_{k}$') #change this if you are using other angles
 plt.ylabel('$F_{true}$')
 plt.title('$\\frac{F_{observed}}{Acceptance function}$')
