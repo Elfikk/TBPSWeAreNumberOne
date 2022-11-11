@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import os
 
 filepath = '/Users/gordonlai/Documents/ICL/ICL_Y3/TBPSWeAreNumberOne/Data' #set your own file path
 
@@ -36,7 +37,7 @@ signal_df['identity'] = 'signal'
 
 
 # plot result
-total_df2 = pd.read_csv(filepath + '/total_ml_4.csv')
+total_df2 = pd.read_csv(filepath + '/total_ml3_1.csv')
 
 # filter using q^2 conditions
 b0mass=total_df2['B0_M']
@@ -63,11 +64,11 @@ plt.figure()
 plt.xlabel('B0_M')
 plt.ylabel('Count')
 # histograms
-plt.hist(total_df2['B0_M'],color='royalblue',label='Total', histtype='step',bins=numbin) # total data
+plt.hist(total_df2['B0_M'],color='royalblue',label='Total', histtype='step',bins=numbin,density=False) # total data
 # plt.hist(signal_df['B0_M'],color='violet',label='Simulated Signal',histtype='step',bins=numbin) # simulated signal from signal.csv
-plt.hist(total_df_sig['B0_M'],color='red',label='ML Predicted Signal', histtype='step',bins=numbin) # ML Predicted Signal on total
-plt.hist(total_df_comb['B0_M'],color='cyan',label='ML Predicted Combinatorial', histtype='step',bins=numbin) # ML Predicted combinatorial background on total
-plt.hist(total_df_peaking['B0_M'],color='green',label='ML Predicted Peaking',histtype='step',bins=numbin) # ML Predicted peaking background on total
+plt.hist(total_df_sig['B0_M'],color='red',label='ML Predicted Signal', histtype='step',bins=numbin,density=False) # ML Predicted Signal on total
+plt.hist(total_df_comb['B0_M'],color='cyan',label='ML Predicted Combinatorial', histtype='step',bins=numbin,density=False) # ML Predicted combinatorial background on total
+plt.hist(total_df_peaking['B0_M'],color='green',label='ML Predicted Peaking',histtype='step',bins=numbin,density=False) # ML Predicted peaking background on total
 # plt.hist(total_df_back['B0_M'],color='green',label='Background', histtype='step',bins=numbin)
 '''# midpoints
 histmidpoints(total_df2['B0_M'],'royalblue','Total')

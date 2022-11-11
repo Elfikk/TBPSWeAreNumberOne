@@ -7,6 +7,7 @@ from sklearn import metrics
 import xgboost as xgb
 import os
 import seaborn as sns
+import lightgbm as lgbm
 
 filepath = '/Users/gordonlai/Documents/ICL/ICL_Y3/TBPSWeAreNumberOne/Data' #set your own file path
 
@@ -52,11 +53,11 @@ signal_df['identity'] = 'signal'
 
 # construct training dataset
 for f in os.listdir(filepath):
-    if not f.startswith('total') and not f.startswith('signal') and not f.startswith('acceptance') and not f.startswith('.DS') and not f.startswith('comb'):
+    if not f.startswith('total') and not f.startswith('signal') and not f.startswith('acceptance') and not f.startswith('.DS') and not f.startswith('comb') and not f.endswith('swap.csv'):
         temp_df = pd.read_csv(filepath + '/' + f)
         temp_df['identity'] = 'peaking'
         signal_df = pd.concat([signal_df,temp_df])
-    elif f.startswith('comb'):
+    elif f.endswith('swap.csv'):
         temp_df = pd.read_csv(filepath + '/' + f)
         temp_df['identity'] = 'combinatorial'
         signal_df = pd.concat([signal_df,temp_df])
@@ -67,12 +68,12 @@ signal_dataset_df_yes_peaking = signal_df[(invarmass > 0.98) & (invarmass < 1.10
 signal_df = signal_df.merge(signal_dataset_df_yes_peaking, how='left', indicator=True)
 signal_df = signal_df[signal_df['_merge'] == 'left_only'] # line 16-17 from stackoverflow.com
 
-# signal_df.to_csv(filepath + '/total_sim_4.csv',index=False) # save training dataset
+signal_df.to_csv(filepath + '/total_sim_6.csv',index=False) # save training dataset
 
 
 
 # tidy up training dataset
-sim_df = pd.read_csv(filepath + '/total_sim_4.csv')
+sim_df = pd.read_csv(filepath + '/total_sim_6.csv')
 sim_df = sim_df.drop(columns_to_remove, axis=1)
 # print(sim_df)
 
@@ -87,7 +88,7 @@ seed = 1
 train_X,test_X,train_Y,test_Y = model_selection.train_test_split(sim_X, sim_Y, test_size = 0.33, random_state = seed)
 
 # actually fitting the training data to the model
-model = xgb.XGBClassifier()
+model = lgbm.LGBMClassifier()
 model.fit(train_X,train_Y)
 
 # predict the result
@@ -100,6 +101,5 @@ print('Accuracy Score = ' +str(accuracy))
 
 # apply ML model to actual dataset
 total_df['identity'] = model.predict(total_df)
-# total_df.to_csv(filepath + '/total_ml_4.csv')
-
+# total_df.to_csv(filepath + '/total_ml_6.csv')
 
