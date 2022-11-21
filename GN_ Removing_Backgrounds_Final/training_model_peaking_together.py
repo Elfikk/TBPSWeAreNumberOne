@@ -32,7 +32,9 @@ Kmumu = pd.read_csv('../Data/Kmumu.csv')
 Kstarp_pi0 = pd.read_csv('../Data/Kstarp_pi0.csv')
 Jpsi_Kstarp_pi0 = pd.read_csv('../Data/Jpsi_Kstarp_pi0.csv')
 
-
+'''
+Script used to train a model to separate signal from background. The background used is a combined dataframe of all simulated backgrounds.
+'''
 
 def remove_columns(dataset, reject_rows = []):
     #'B0_M', 'J_psi_M', 'q2','Kstar_M'

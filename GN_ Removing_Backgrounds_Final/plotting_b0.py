@@ -126,18 +126,28 @@ if __name__ == '__main__':
     '''
     Loads in the peaking model and comb models... and applies them.
     '''
+    #boolean controls if the peaking model used is the based off multiple peaking models or just one combined one.
+    separate = False
     directory = 'peaking_models'
     training = s_c_dataset.copy()
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        # checking if it is a file
-        if os.path.isfile(f):
-            model = xgb.XGBClassifier()
-            model.load_model(f)
-            temp_full = training
-            training = remove_columns(training, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
-            ypred = model.predict(training)
-            training = temp_full.loc[ypred == 1]
+    if separate == True:
+        for filename in os.listdir(directory):
+            f = os.path.join(directory, filename)
+            # checking if it is a file
+            if os.path.isfile(f):
+                model = xgb.XGBClassifier()
+                model.load_model(f)
+                temp_full = training
+                training = remove_columns(training, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+                ypred = model.predict(training)
+                training = temp_full.loc[ypred == 1]
+    elif separate == False:
+        peaking_model = xgb.XGBClassifier()
+        peaking_model.load_model('peaking_model_trained_together_removed_q2_range.model')
+        temp_full = training
+        training = remove_columns(training, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+        ypred = peaking_model.predict(training)
+        training = temp_full.loc[ypred == 1]
 
     model = xgb.XGBClassifier()
     model.load_model('comb_model_5350_removed_q2_range.model')
