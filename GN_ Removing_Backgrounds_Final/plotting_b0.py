@@ -99,7 +99,7 @@ def plot(x,y,dataset,param,bins_n,y_0,y_exp, name_of_graph,dataset_name):
     plt.title(name_of_graph)
     plt.ylim(0)
     plt.legend()
-    plt.savefig(str(name_of_graph)+'.jpg', bbox_inches="tight", pad_inches=0, format="jpg", dpi=600)
+    plt.savefig('B0_plot_graph/'+str(name_of_graph)+'.jpg', bbox_inches="tight", pad_inches=0, format="jpg", dpi=600)
     plt.show()
 
 def remove_columns(dataset, reject_rows = []):
@@ -116,6 +116,34 @@ def remove_columns(dataset, reject_rows = []):
     
     return dataset_modified
 
+
+def high_corrolation_list_peaking_together(num):
+    corrolation = pd.read_csv('Peaking_Together_Correlation/continuous_f1_score_peaking_together.csv')
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx > num-1):
+            array_list.append(key)
+    return array_list
+
+def high_corrolation_list_comb(num):
+    corrolation = pd.read_csv('Comb_Correlation/continuous_f1_score_comb.csv')
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx > num-1):
+            array_list.append(key)
+    return array_list
 
 if __name__ == '__main__':
     total_data = pd.read_csv('../data/total_dataset.csv')
@@ -143,22 +171,26 @@ if __name__ == '__main__':
                 training = temp_full.loc[ypred == 1]
     elif separate == False:
         peaking_model = xgb.XGBClassifier()
-        peaking_model.load_model('peaking_model_trained_together_removed_q2_range.model')
+        peaking_model.load_model('Peaking_Models_Together/peaking_model_trained_together_removed_q2_range_13_features.model')
         temp_full = training
-        training = remove_columns(training, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+        remove_col_list = high_corrolation_list_peaking_together(13)
+        training = remove_columns(training, remove_col_list)
         ypred = peaking_model.predict(training)
         training = temp_full.loc[ypred == 1]
 
+
     model = xgb.XGBClassifier()
-    model.load_model('comb_model_5350_removed_q2_range.model')
+    model.load_model('Comb_Model/comb_model_5350_removed_q2_range_29_features.model')
     
     temp_full = training
 
-    training = remove_columns(temp_full, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+    remove_columns_array = high_corrolation_list_comb(29)
+    remove_columns_array.append('B0_M')
+    training = remove_columns(temp_full, remove_columns_array)
     ypred = model.predict(training)
 
     signal_ml = temp_full.loc[ypred == 1]
-    comb_ml = temp_full.loc[ypred == 0]
+
 
     #writes the ml signal to file (peaking and comb applied).
     signal_ml.to_csv('ML_SIGNAL_BDT.csv')

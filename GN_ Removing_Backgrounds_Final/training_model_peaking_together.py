@@ -61,12 +61,12 @@ def train_model(X_train,y_train,X_test,y_test):
             eval_set = [(X_test,y_test)]
             )
 
-    model.save_model('peaking_model_trained_together_removed_q2_range.model')
+    model.save_model('Peaking_Models_Together/peaking_model_trained_together_removed_q2_range_13_features.model')
 
     return model
 
 def high_corrolation_list(num):
-    corrolation = pd.read_csv('continuous_f1_score_peaking_together.csv')
+    corrolation = pd.read_csv('Peaking_Together_Correlation/continuous_f1_score_peaking_together.csv')
     cols = corrolation.columns.tolist()
     values = {}
     for x in cols:
@@ -75,25 +75,24 @@ def high_corrolation_list(num):
     values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
     array_list = []
     for idx, key in enumerate(values):
-        if(idx <= num):
+        if(idx > num-1):
             array_list.append(key)
-        else:
-            break
     return array_list
 
 if __name__ == '__main__':
-    background_models = [jpsi_mu_k_swap,jpsi_mu_pi_swap,k_pi_swap,phimumu,pKmumu_piTok_kTop,pKmumu_piTop,Kmumu,Kstarp_pi0,Jpsi_Kstarp_pi0]
-    string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0','Jpsi_Kstarp_pi0']
+    background_models = [jpsi_mu_k_swap,jpsi_mu_pi_swap,k_pi_swap,phimumu,pKmumu_piTok_kTop,pKmumu_piTop,Kmumu,Kstarp_pi0]
+    string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0']
     signal.loc[:, "target"] = 1
-    remove_columns_array = high_corrolation_list(25)
-    signal_clean = remove_columns(signal, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+    remove_columns_array = high_corrolation_list(13)
+    signal_q2_range = q2_ranges(signal)
+    signal_clean = remove_columns(signal_q2_range, remove_columns_array)
     combine = signal_clean
     for idx,x in enumerate(background_models):
         x.loc[:, "target"] = 0
 
         x = q2_ranges(x)
 
-        background_clean = remove_columns(x, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+        background_clean = remove_columns(x, remove_columns_array)
 
         #We then combine the entire dataset.
         combine = pd.concat((combine,background_clean), ignore_index=True, axis=0)
@@ -101,6 +100,7 @@ if __name__ == '__main__':
     #We then shuffle the order and relabel the index.
     combine = combine.sample(frac=1)
     combine = combine.reset_index(drop=True)
+    print(combine.columns.tolist())
 
     #CREATING THE TRAINING AND TEST DATA
     seed = 42

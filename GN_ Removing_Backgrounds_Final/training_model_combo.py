@@ -52,13 +52,13 @@ def train_model(X_train,y_train,X_test,y_test):
                 eval_set = [(X_test,y_test)]
                 )
 
-    model.save_model('comb_model_'+str(THRESHOLD)+'_removed_q2_range.model')
+    model.save_model('Comb_Model/comb_model_'+str(THRESHOLD)+'_removed_q2_range_29_features.model')
 
     return model
 
 
 def high_corrolation_list(num):
-    corrolation = pd.read_csv('continuous_f1_score.csv')
+    corrolation = pd.read_csv('Comb_Correlation/continuous_f1_score_comb.csv')
     cols = corrolation.columns.tolist()
     values = {}
     for x in cols:
@@ -67,10 +67,8 @@ def high_corrolation_list(num):
     values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
     array_list = []
     for idx, key in enumerate(values):
-        if(idx <= num):
+        if(idx > num-1):
             array_list.append(key)
-        else:
-            break
     return array_list
 
 if __name__ == '__main__':
@@ -84,7 +82,7 @@ if __name__ == '__main__':
 
     signal = q2_ranges(signal)
     combo_data = q2_ranges(combo_data)
-    remove_columns_array = high_corrolation_list(10)
+    remove_columns_array = high_corrolation_list(29)
     remove_columns_array.append('B0_M')
     signal_clean = remove_columns(signal, remove_columns_array)
     combo_data_clean = remove_columns(combo_data, remove_columns_array)
