@@ -11,7 +11,9 @@ from matplotlib.ticker import StrMethodFormatter
 
 def q2_ranges(dataset):
     q2 = dataset['q2']
-    range1 = ((q2 >= 0.1) & (q2 < 0.98)) | ((q2 > 1.1) & (q2 < 8)) | ((q2 > 11) & (q2 < 12.5)) | ((q2 > 15) & (q2 < 19))
+    range1 = ((q2 >= 0.1) & (q2 < 8)) | ((q2 > 11) & (q2 < 12.5)) | ((q2 > 15) & (q2 < 19))
+    #range1 = ((q2 >= 0.1) & (q2 < 9.20)) | ((q2 > (9.98)) & (q2 < 13.04)) | ((q2 > 14.14) & (q2 < 19))
+    #range_removed = (13.27 >= q2) & (13.90 <= q2) | (9.37 >= q2) & (9.82 <= q2)
     dataset = dataset[range1]
     return dataset[range1]
 

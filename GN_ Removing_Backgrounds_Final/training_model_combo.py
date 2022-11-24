@@ -20,6 +20,7 @@ from scipy.optimize import curve_fit
 from selection_criteria import apply_all_selection
 from selection_criteria import q2_ranges
 
+
 total_data = pd.read_csv('../data/total_dataset.csv')
 signal = pd.read_csv('../Data/signal.csv')
 
@@ -47,12 +48,30 @@ def train_model(X_train,y_train,X_test,y_test):
 
     model.fit(X_train,
                 y_train,
-                eval_metric = 'logloss'
+                eval_metric = 'logloss',
+                eval_set = [(X_test,y_test)]
                 )
 
     model.save_model('comb_model_'+str(THRESHOLD)+'_removed_q2_range.model')
 
     return model
+
+
+def high_corrolation_list(num):
+    corrolation = pd.read_csv('continuous_f1_score.csv')
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx <= num):
+            array_list.append(key)
+        else:
+            break
+    return array_list
 
 if __name__ == '__main__':
     total_data = pd.read_csv('../data/total_dataset.csv')
@@ -65,9 +84,10 @@ if __name__ == '__main__':
 
     signal = q2_ranges(signal)
     combo_data = q2_ranges(combo_data)
-
-    signal_clean = remove_columns(signal, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
-    combo_data_clean = remove_columns(combo_data, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+    remove_columns_array = high_corrolation_list(10)
+    remove_columns_array.append('B0_M')
+    signal_clean = remove_columns(signal, remove_columns_array)
+    combo_data_clean = remove_columns(combo_data, remove_columns_array)
 
     #We then combine the entire dataset.
     combine = pd.concat((signal_clean,combo_data_clean), ignore_index=True, axis=0)
@@ -86,3 +106,5 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed, stratify = y)
 
     model = train_model(X_train,y_train,X_test,y_test)
+
+    

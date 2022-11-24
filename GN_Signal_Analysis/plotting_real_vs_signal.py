@@ -9,6 +9,10 @@ import os
 total_data = pd.read_csv('../data/total_dataset.csv')
 signal = pd.read_csv('../Data/signal.csv')
 
+'''
+This graph generates the graphs which compare each feature of the total dataset and signal
+'''
+
 def clean_dataset(dataset, reject_rows = []):
     dataset_modified = dataset.copy()
     dataset_modified.drop(columns=['Unnamed: 0.1','Unnamed: 0', 'year', 'B0_ID'], inplace=True)

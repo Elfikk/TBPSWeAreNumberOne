@@ -65,10 +65,27 @@ def train_model(X_train,y_train,X_test,y_test):
 
     return model
 
+def high_corrolation_list(num):
+    corrolation = pd.read_csv('continuous_f1_score_peaking_together.csv')
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx <= num):
+            array_list.append(key)
+        else:
+            break
+    return array_list
+
 if __name__ == '__main__':
     background_models = [jpsi_mu_k_swap,jpsi_mu_pi_swap,k_pi_swap,phimumu,pKmumu_piTok_kTop,pKmumu_piTop,Kmumu,Kstarp_pi0,Jpsi_Kstarp_pi0]
     string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0','Jpsi_Kstarp_pi0']
     signal.loc[:, "target"] = 1
+    remove_columns_array = high_corrolation_list(25)
     signal_clean = remove_columns(signal, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
     combine = signal_clean
     for idx,x in enumerate(background_models):
