@@ -271,6 +271,16 @@ def column_remove(df, columns_to_remove = SR.columns_to_remove):
 
     return df
 
+def column_keep(df, columns_to_keep):
+    # Removes all unpassed columns from a dataframe. Use to specify 
+    # important columns for training.
+
+    for column in df.columns:
+        if column not in columns_to_keep:
+            df = df.drop(columns = column)
+
+    return df
+
 def comb_total_training(apply_q2 = True, nrows = None):
     # Attempting to remove combinatorial background using B0_M > 5350 method, 
     # where we use the total dataset above a threshhold mass as our 
@@ -300,6 +310,44 @@ def comb_total_training(apply_q2 = True, nrows = None):
     # training_set, masses = training_set.drop(columns = ["B0_M"]), training_set["B0_M"]
 
     return training_set#, masses
+
+def general_data_load(datasets_background, datasets_signal, cols_to_drop, cols_to_keep,
+                      extra_methods, apply_q2 = True):
+    if cols_to_drop:
+        column_method = column_remove
+        columns = cols_to_drop
+    elif cols_to_keep:
+        column_method = column_keep
+        columns = cols_to_keep
+
+    dataframes = {}
+
+    #To just have one file reading loop. This lines required Python 3.5
+    #or greater!
+    datasets = {**{dataset: 0 for dataset in datasets_background},\
+                **{dataset: 1 for dataset in datasets_signal}}
+
+    for file in datasets:
+        df = pd.read_csv(file)
+        if file in extra_methods:
+            for method_list in extra_methods[file]:
+                method = method_list[0]
+                args = method_list[1:]
+                df = method(df, *args)
+        df = column_method(df, columns)
+        df["Signal"] = datasets[file]
+        dataframes[file] = df
+
+    data = pd.concat(list(dataframes.values()), ignore_index=True)
+
+    if apply_q2:
+        data = apply_q2_ranges(data)
+
+    return data
+
+def mass_exclusion_above(df, *args):
+    b0_m = df["B0_M"]
+    return df.loc[b0_m > args[0]]
 
 if __name__ == "__main__":
 
