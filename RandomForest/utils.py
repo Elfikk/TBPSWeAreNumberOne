@@ -28,6 +28,6 @@ def bins_plot(processed_data_path):
 
 if __name__ == "__main__":
 
-    path = "ML_SIGNAL_BDT(1).csv"
+    path = "D:/Projekty/Coding/Python/TBPSWeAreNumberOne/data/acceptance_mc.csv"
 
     bins_plot(path)
