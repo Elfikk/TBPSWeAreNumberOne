@@ -145,6 +145,21 @@ def high_corrolation_list_comb(num):
             array_list.append(key)
     return array_list
 
+def high_corrolation_list_peaking_separate(num,name_of_background):
+    corrolation = pd.read_csv('Peaking_Separate_Correlation/continuous_f1_score_{}.csv'.format(name_of_background))
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx > num-1):
+            array_list.append(key)
+    return array_list
+
 if __name__ == '__main__':
     total_data = pd.read_csv('../data/total_dataset.csv')
     #signal_ml = pd.read_csv('Signal_ML_Combo_removed_only.csv')
@@ -155,20 +170,20 @@ if __name__ == '__main__':
     Loads in the peaking model and comb models... and applies them.
     '''
     #boolean controls if the peaking model used is the based off multiple peaking models or just one combined one.
-    separate = False
+    separate = True
     directory = 'peaking_models'
     training = s_c_dataset.copy()
     if separate == True:
-        for filename in os.listdir(directory):
-            f = os.path.join(directory, filename)
-            # checking if it is a file
-            if os.path.isfile(f):
-                model = xgb.XGBClassifier()
-                model.load_model(f)
-                temp_full = training
-                training = remove_columns(training, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
-                ypred = model.predict(training)
-                training = temp_full.loc[ypred == 1]
+        string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0']
+        count = [4,5,5,7,6,8,7,7]
+        for idx,x in enumerate(string_background_models):
+            peaking_model = xgb.XGBClassifier()
+            peaking_model.load_model('Peaking_Models_Separate/peaking_model_'+x+'_removed_q2_range.model')
+            temp_full = training
+            remove_rows = high_corrolation_list_peaking_separate(count[idx],x)
+            training = remove_columns(training, remove_rows)
+            ypred = peaking_model.predict(training)
+            training = temp_full.loc[ypred == 1]
     elif separate == False:
         peaking_model = xgb.XGBClassifier()
         peaking_model.load_model('Peaking_Models_Together/peaking_model_trained_together_removed_q2_range_13_features.model')

@@ -51,6 +51,22 @@ def remove_columns(dataset, reject_rows = []):
     
     return dataset_modified
 
+
+def high_corrolation_list_peaking_separate(num,name_of_background):
+    corrolation = pd.read_csv('Peaking_Separate_Correlation/continuous_f1_score_{}.csv'.format(name_of_background))
+    cols = corrolation.columns.tolist()
+    values = {}
+    for x in cols:
+        values[x] = float(corrolation[x])
+
+    values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+
+    array_list = []
+    for idx, key in enumerate(values):
+        if(idx > num-1):
+            array_list.append(key)
+    return array_list
+
 def train_model(X_train,y_train,X_test,y_test,name_of_model):
     model = xgb.XGBClassifier('binary:logistic', missing = np.nan, seed = 42)
 
@@ -62,13 +78,14 @@ def train_model(X_train,y_train,X_test,y_test,name_of_model):
             eval_set = [(X_test,y_test)]
             )
 
-    model.save_model('peaking_models/peaking_model_'+name_of_model+'_removed_q2_range.model')
+    model.save_model('Peaking_Models_Separate/peaking_model_'+name_of_model+'_removed_q2_range.model')
 
     return model
 
 if __name__ == '__main__':
-    background_models = [jpsi_mu_k_swap,jpsi_mu_pi_swap,k_pi_swap,phimumu,pKmumu_piTok_kTop,pKmumu_piTop,Kmumu,Kstarp_pi0,Jpsi_Kstarp_pi0]
-    string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0','Jpsi_Kstarp_pi0']
+    background_models = [jpsi_mu_k_swap,jpsi_mu_pi_swap,k_pi_swap,phimumu,pKmumu_piTok_kTop,pKmumu_piTop,Kmumu,Kstarp_pi0]
+    string_background_models = ['jpsi_mu_k_swap','jpsi_mu_pi_swap','k_pi_swap','phimumu','pKmumu_piTok_kTop','pKmumu_piTop','Kmumu','Kstarp_pi0']
+    count = [4,5,5,7,6,8,7,7]
     for idx,x in enumerate(background_models):
         signal.loc[:, "target"] = 1
         x.loc[:, "target"] = 0
@@ -76,8 +93,10 @@ if __name__ == '__main__':
         signal = q2_ranges(signal)
         x = q2_ranges(x)
 
-        signal_clean = remove_columns(signal, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
-        background_clean = remove_columns(x, ['B0_M', 'J_psi_M', 'q2','Kstar_M'])
+        remove_rows = high_corrolation_list_peaking_separate(count[idx],string_background_models[idx])
+
+        signal_clean = remove_columns(signal, remove_rows)
+        background_clean = remove_columns(x, remove_rows)
 
         #We then combine the entire dataset.
         combine = pd.concat((signal_clean,background_clean), ignore_index=True, axis=0)
