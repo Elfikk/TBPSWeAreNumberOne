@@ -311,8 +311,8 @@ def comb_total_training(apply_q2 = True, nrows = None):
 
     return training_set#, masses
 
-def general_data_load(datasets_background, datasets_signal, cols_to_drop, cols_to_keep,
-                      extra_methods, apply_q2 = True):
+def general_data_load(datasets_background, datasets_signal, cols_to_drop = None,
+                      cols_to_keep = None, extra_methods = {}, apply_q2 = True):
     if cols_to_drop:
         column_method = column_remove
         columns = cols_to_drop
@@ -329,6 +329,8 @@ def general_data_load(datasets_background, datasets_signal, cols_to_drop, cols_t
 
     for file in datasets:
         df = pd.read_csv(file)
+        if apply_q2:
+            df = apply_q2_ranges(df)
         if file in extra_methods:
             for method_list in extra_methods[file]:
                 method = method_list[0]
@@ -340,14 +342,40 @@ def general_data_load(datasets_background, datasets_signal, cols_to_drop, cols_t
 
     data = pd.concat(list(dataframes.values()), ignore_index=True)
 
-    if apply_q2:
-        data = apply_q2_ranges(data)
-
     return data
 
 def mass_exclusion_above(df, *args):
     b0_m = df["B0_M"]
     return df.loc[b0_m > args[0]]
+
+def prediction_data_load(dataset_path, cols_to_drop = None, cols_to_keep = None,
+                         extra_methods = {}, apply_q2 = True):
+
+    if cols_to_drop:
+        column_method = column_remove
+        reverse_method = column_keep
+        columns = cols_to_drop
+    elif cols_to_keep:
+        column_method = column_keep
+        reverse_method = column_remove
+        columns = cols_to_keep
+
+    total_dataset = pd.read_csv(dataset_path)
+    if apply_q2:
+        total_dataset = apply_q2_ranges(total_dataset)
+    if dataset_path in extra_methods:
+        for method_list in extra_methods[dataset_path]:
+            method = method_list[0]
+            args = method_list[1:]
+            total_dataset = method(total_dataset, *args)
+
+    # print(total_dataset)
+
+    predictions_set = column_method(total_dataset, columns)
+    remaining_set = reverse_method(total_dataset, columns)
+
+    return predictions_set, remaining_set
+
 
 if __name__ == "__main__":
 

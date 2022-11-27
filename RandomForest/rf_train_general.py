@@ -1,7 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RandomizedSearchCV, train_test_split, GridSearchCV
 from sklearn.metrics import f1_score, ConfusionMatrixDisplay, confusion_matrix
-from preprocessing import general_data_load, mass_exclusion_above
+from preprocessing import general_data_load, mass_exclusion_above, prediction_data_load, apply_q2_ranges
+import standard_removing as SR
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -135,6 +136,59 @@ def comb_train_example():
     cols_to_drop= columns_to_remove, extra_methods=extra_methods,
     plot_cm=True, grid_search=GridSearchCV, grid_search_params=params)
 
+def full_column_training(base_path = "D:/Projekty/Coding/Python/TBPSWeAreNumberOne/data"):
+
+    #base_path is absolute path to the data folder.
+
+    model_features = SR.model_features
+
+    extra_methods = {"total_dataset.csv": [[mass_exclusion_above, 5350]]}
+
+    for file in model_features:
+        path_background = base_path + "/" + file + ".csv"
+        signal_path = base_path + "/signal.csv"
+        model_name = "ColumnModels/" + file + ".joblib"
+        rf_train(model_name, [signal_path], [path_background], \
+            cols_to_keep=model_features[file], extra_methods=extra_methods)
+
+def general_mass_plot(models, total_dataset_path, cols_to_keep = None, 
+                      cols_to_remove = None, apply_q2 = True, extra_methods = {}):
+    #Models is a path to the folder keeping all the relevant models inside.
+
+    all_labels = []
+
+    for model in os.listdir(models):
+        predictor = joblib.load(models + "/" + model)
+        prediction_data, rest = prediction_data_load(total_dataset_path, 
+                                cols_to_remove, cols_to_keep[model[:-len(".joblib")]], extra_methods, apply_q2)
+        # print(prediction_data)
+        labels = predictor.predict(prediction_data)
+        if len(all_labels):
+            all_labels = all_labels * labels
+        else:
+            all_labels = labels
+
+    total_set = pd.read_csv(total_dataset_path)
+    if apply_q2:
+        total_set = apply_q2_ranges(total_set)
+
+    signal = total_set.iloc[all_labels == 1]
+    print(len(signal))
+    backgrounds = total_set.iloc[all_labels == 0]
+
+    b0m_signal = signal["B0_M"]
+    b0m_background = backgrounds["B0_M"]
+
+    bins = list(np.linspace(5170, 5700, 100))
+    plt.hist(b0m_signal, bins = bins, density=True, histtype = "step", label="Signal")
+    plt.hist(b0m_background, bins = bins, density=True, histtype = "step", label = "Backgrounds")
+    plt.show()
+    
+
 if __name__ == "__main__":
 
-    comb_train_example()
+    # comb_train_example()
+    # full_column_training()
+    general_mass_plot("D:\Projekty\Coding\Python\TBPSWeAreNumberOne\RandomForest\ColumnModels",
+                      "D:/Projekty/Coding/Python/TBPSWeAreNumberOne/data/total_dataset.csv",
+                       SR.model_features)
