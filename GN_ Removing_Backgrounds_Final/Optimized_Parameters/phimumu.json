@@ -1,0 +1,1 @@
+{"colsample_bytree": 0.8255579160888051, "gamma": 4.343259640972592, "max_depth": 16.0, "min_child_weight": 3.0, "reg_alpha": 40.0, "reg_lambda": 0.6472746734950688, "n_estimators": 180, "seed": 42, "max_delta_step": 1}
