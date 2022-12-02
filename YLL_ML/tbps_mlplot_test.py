@@ -37,7 +37,7 @@ signal_df['identity'] = 'signal'
 
 
 # plot result
-total_df2 = pd.read_csv(filepath + '/total_ml3_1.csv')
+total_df2 = pd.read_csv(filepath + '/total_ml3_3.csv')
 
 # filter using q^2 conditions
 b0mass=total_df2['B0_M']
@@ -58,6 +58,7 @@ def histmidpoints(data,colour,name,binn=100):
     midpoints = 0.5 * (bin_edges[1:] + bin_edges[:-1])
     return plt.plot(midpoints,bin_height,'-',color=colour,label=name)
     
+print('Number of signal candidate = ' +str(len(total_df_sig)))
 # da plots
 numbin=100
 plt.figure()
