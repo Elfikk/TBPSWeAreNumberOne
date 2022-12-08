@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.optimize as spc
-
+# function for gaussian 
 def gaussianfit(data,title):
     bin_height, bin_edges, patches = plt.hist(data, bins=1000,alpha=0)
     midpoints = 0.5 * (bin_edges[1:] + bin_edges[:-1])
